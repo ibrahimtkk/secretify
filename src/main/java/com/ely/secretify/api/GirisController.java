@@ -1,5 +1,8 @@
 package com.ely.secretify.api;
 
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,12 +20,49 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/")
 public class GirisController {
+
+    SerialPort comPort;
+    String buffer = "";
+
+    public GirisController() {
+
+        comPort = SerialPort.getCommPorts()[0];
+        comPort.openPort();
+
+
+
+
+        comPort.addDataListener(new SerialPortDataListener() {
+            @Override
+            public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_AVAILABLE; }
+            @Override
+            public void serialEvent(SerialPortEvent event)
+            {
+                if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
+                    return;
+                byte[] newData = new byte[comPort.bytesAvailable()];
+                int numRead = comPort.readBytes(newData, newData.length);
+                String str = new String(newData);
+
+                buffer += str;
+                if(buffer.endsWith("\n"))
+                {
+                    System.out.println("oyle bir mesac geldi kiiiiiii " + buffer );
+                    buffer = "";
+                }
+            }
+        });
+
+    }
+
+
 
     private static Logger log = LoggerFactory.getLogger(GirisController.class);
     private List followersUsers;
@@ -120,6 +160,10 @@ public class GirisController {
     @RequestMapping(value = "basic", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> basicGetRequest(){
         log.info("---basic---");
+
+        String str = new Date().toString()  + "\n";
+
+        comPort.writeBytes(str.getBytes() , str.length());
         return new ResponseEntity<>("name", HttpStatus.ACCEPTED);
     }
 
