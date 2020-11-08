@@ -157,14 +157,23 @@ public class GirisController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @RequestMapping(value = "basic", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> basicGetRequest(){
+    @RequestMapping(value = "basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> basicGetRequest(@RequestBody GelenVeriler gelenVeriler){
         log.info("---basic---");
+
+        String sendData = gelenVeriler.istenenSicaklik + "\n";
 
         String str = new Date().toString()  + "\n";
 
-        comPort.writeBytes(str.getBytes() , str.length());
+        comPort.writeBytes(sendData.getBytes() , sendData.length());
         return new ResponseEntity<>("name", HttpStatus.ACCEPTED);
+    }
+
+    @RequestMapping(value = "readTemperature", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> sendReadTemperature(@RequestBody GelenVeriler gelenVeriler){
+        log.info("---readTemp---");
+
+        return new ResponseEntity<>(buffer, HttpStatus.ACCEPTED);
     }
 
 
@@ -388,6 +397,43 @@ public class GirisController {
 //    }
 
     }
+
+    private static class GelenVeriler{
+        private String istenenSicaklik;
+
+        public GelenVeriler(){}
+
+        public GelenVeriler(String istenenSicaklik) {
+            this.istenenSicaklik = istenenSicaklik;
+        }
+
+        public String getIstenenSicaklik() {
+            return istenenSicaklik;
+        }
+
+        public void setIstenenSicaklik(String istenenSicaklik) {
+            this.istenenSicaklik = istenenSicaklik;
+        }
+    }
+
+    private static class GidecekVeriler{
+        private String mevcutSicaklik;
+
+        public GidecekVeriler(){}
+
+        public GidecekVeriler(String mevcutSicaklik) {
+            this.mevcutSicaklik = mevcutSicaklik;
+        }
+
+        public String getMevcutSicaklik() {
+            return mevcutSicaklik;
+        }
+
+        public void setMevcutSicaklik(String mevcutSicaklik) {
+            this.mevcutSicaklik = mevcutSicaklik;
+        }
+    }
+
     private static class UsernameJSON{
         private String username;
 
