@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 //import org.brunocvcunha.instagram4j.Instagram4j;
 //import org.brunocvcunha.instagram4j.requests.payload.*;
+import com.mathworks.engine.EngineException;
+import com.mathworks.engine.MatlabEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,37 +30,41 @@ import java.util.List;
 @RequestMapping("/api/")
 public class GirisController {
 
-    SerialPort comPort;
-    String buffer = "";
+//    SerialPort comPort;
+//    String buffer = "";
 
-    public GirisController() {
+    public GirisController() throws EngineException, InterruptedException {
 
-        comPort = SerialPort.getCommPorts()[0];
-        comPort.openPort();
+//        String[] engines = MatlabEngine.findMatlab();
+//        MatlabEngine eng = MatlabEngine.connectMatlab(engines[0]);
+//        int a = 1;
 
-
-
-
-        comPort.addDataListener(new SerialPortDataListener() {
-            @Override
-            public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_AVAILABLE; }
-            @Override
-            public void serialEvent(SerialPortEvent event)
-            {
-                if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
-                    return;
-                byte[] newData = new byte[comPort.bytesAvailable()];
-                int numRead = comPort.readBytes(newData, newData.length);
-                String str = new String(newData);
-
-                buffer += str;
-                if(buffer.endsWith("\n"))
-                {
-                    System.out.println("oyle bir mesac geldi kiiiiiii " + buffer );
-                    buffer = "";
-                }
-            }
-        });
+//        comPort = SerialPort.getCommPorts()[0];
+//        comPort.openPort();
+//
+//
+//
+//
+//        comPort.addDataListener(new SerialPortDataListener() {
+//            @Override
+//            public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_AVAILABLE; }
+//            @Override
+//            public void serialEvent(SerialPortEvent event)
+//            {
+//                if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
+//                    return;
+//                byte[] newData = new byte[comPort.bytesAvailable()];
+//                int numRead = comPort.readBytes(newData, newData.length);
+//                String str = new String(newData);
+//
+//                buffer += str;
+//                if(buffer.endsWith("\n"))
+//                {
+//                    System.out.println("oyle bir mesac geldi kiiiiiii " + buffer );
+//                    buffer = "";
+//                }
+//            }
+//        });
 
     }
 
@@ -157,6 +163,48 @@ public class GirisController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @RequestMapping(value = "giris", method = RequestMethod.POST,  consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> giris(@RequestBody GirisVerileri girisVerileri){
+        if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+
+        log.info("gelen veriler: {}, {}", girisVerileri.getEmail(), girisVerileri.getSifre());
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+//    @RequestMapping(value = "giris", method = RequestMethod.POST,  consumes = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<Void> giris(@RequestBody GirisVerileri girisVerileri){
+//        if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+//            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+//
+//        log.info("gelen veriler: {}, {}", girisVerileri.getEmail(), girisVerileri.getSifre());
+//
+//        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+//    }
+
+    @RequestMapping(value = "login", method = RequestMethod.POST,  consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> doktorGiris(@RequestBody GirisVerileri girisVerileri){
+        if (girisVerileri.type.equals("hasta")){
+            if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+                return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+        else if (girisVerileri.type.equals("hasta")){
+            if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+                return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+        else if (girisVerileri.type.equals("hasta")){
+            if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+                return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+        else if (girisVerileri.type.equals("hasta")){
+            if (girisVerileri.email.equals("halİT") && girisVerileri.sifre.equals("ibok"))
+                return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
     @RequestMapping(value = "basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> basicGetRequest(@RequestBody GelenVeriler gelenVeriler){
         log.info("---basic---");
@@ -165,15 +213,21 @@ public class GirisController {
 
         String str = new Date().toString()  + "\n";
 
-        comPort.writeBytes(sendData.getBytes() , sendData.length());
-        return new ResponseEntity<>("name", HttpStatus.ACCEPTED);
+//        comPort.writeBytes(sendData.getBytes() , sendData.length());
+        return new ResponseEntity<>(sendData, HttpStatus.ACCEPTED);
     }
 
     @RequestMapping(value = "readTemperature", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sendReadTemperature(@RequestBody GelenVeriler gelenVeriler){
-        log.info("---readTemp---");
-
-        return new ResponseEntity<>(buffer, HttpStatus.ACCEPTED);
+    public ResponseEntity<Integer> sendReadTemperature(@RequestBody GelenVeriler gelenVeriler){
+//        log.info("---readTemp---");
+        int sendBuffer = 0;
+        try{
+            sendBuffer = Integer.parseInt("buffer");
+        }
+        catch (Exception e){
+            sendBuffer = 5;
+        }
+        return new ResponseEntity<>(sendBuffer, HttpStatus.ACCEPTED);
     }
 
 
@@ -396,6 +450,43 @@ public class GirisController {
 //        return "fail";
 //    }
 
+    }
+
+    private static class GirisVerileri {
+        private String email;
+        private String sifre;
+        private String type;
+
+
+        public GirisVerileri(String email, String sifre, String type) {
+            this.email = email;
+            this.sifre = sifre;
+            this.type = type;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getSifre() {
+            return sifre;
+        }
+
+        public void setSifre(String sifre) {
+            this.sifre = sifre;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
     }
 
     private static class GelenVeriler{
